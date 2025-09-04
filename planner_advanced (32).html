@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAPA DE VENDAS</title>
+  <style>
+    /* Estilo básico e responsivo */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .warning {
+      padding: 10px;
+      background-color: #ffebee;
+      border: 1px solid #ef9a9a;
+      border-radius: 4px;
+      color: #c62828;
+      margin-top: 10px;
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid #e0e0e0;
+      padding: 8px;
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      box-sizing: border-box;
+    }
+
+    /* Permite quebra de linha nos cabeçalhos e evita truncamento */
+    th {
+      white-space: normal;
+      overflow: visible;
+      text-overflow: initial;
+      font-weight: bold;
+    }
+
+    /* Estilos para os títulos e descrições no cabeçalho da tabela */
+    .header-title {
+      font-size: 14px;
+      font-weight: bold;
+      line-height: 1.2;
+    }
+    .header-desc {
+      font-size: 10px;
+      color: #555;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    input.meta-atingida {
+      width: 90%;
+      padding: 4px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    input.date-input {
+      width: 100%;
+      padding: 4px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    /* Layout do cabeçalho com gráfico de pizza */
+    .header-flex {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+
+    .header-inputs {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .pie-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Contêiner para os gráficos de barras e performance */
+    .charts-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .chart-box {
+      flex: 1 1 500px;
+      background-color: #ffffff;
+      border: 1px solid #eeeeee;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      padding: 10px;
+    }
+
+    .chart-box canvas {
+      width: 100%;
+      height: 220px;
+    }
+
+    /* Cores de fundo alternadas para linhas da tabela */
+    tbody tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+
+    /* Ajustes de largura das colunas para melhorar a legibilidade */
+    /* Definição de larguras e cores para 10 colunas */
+    th:nth-child(1), td:nth-child(1) {
+      width: 50px;
+    }
+    th:nth-child(2), td:nth-child(2) {
+      width: 100px;
+    }
+    th:nth-child(3), td:nth-child(3) {
+      width: 120px;
+      background-color: #e3f2fd; /* Meta diária */
+    }
+    th:nth-child(4), td:nth-child(4) {
+      width: 130px;
+      background-color: #fff9c4; /* Meta ant. */
+    }
+    th:nth-child(5), td:nth-child(5) {
+      width: 160px;
+      background-color: #fce4ec; /* Atingido */
+    }
+    th:nth-child(6), td:nth-child(6) {
+      width: 80px;
+      background-color: #e0f7fa; /* % */
+    }
+    th:nth-child(7), td:nth-child(7) {
+      width: 130px;
+      background-color: #e8f5e9; /* Meta dia */
+    }
+    th:nth-child(8), td:nth-child(8) {
+      width: 150px;
+      background-color: #ede7f6; /* Projeção em valor */
+    }
+    th:nth-child(9), td:nth-child(9) {
+      width: 120px;
+      background-color: #fff3e0; /* Projeção em % */
+    }
+    th:nth-child(10), td:nth-child(10) {
+      width: 50px;
+      background-color: #f5f5f5; /* Status */
+    }
+
+    /* Estilos para o gadget de resumo diário */
+    .summary-container {
+      flex: 1 1 300px;
+      max-width: 350px;
+      background: linear-gradient(135deg, #f1f8e9, #e3f2fd);
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .summary-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .summary-date-input {
+      width: 100%;
+      padding: 4px 6px;
+      margin-bottom: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .summary-items {
+      width: 100%;
+      margin-top: 4px;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 6px;
+      border-radius: 4px;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+    .summary-label {
+      font-weight: bold;
+    }
+    .summary-value {
+      font-weight: normal;
+    }
+    /* Cores vibrantes e gradientes para o resumo diário */
+    .summary-meta-diaria { background: linear-gradient(135deg, #bbdefb, #64b5f6); }
+    /* Meta ajustada em amarelo vibrante */
+    .summary-meta-ajustada { background: linear-gradient(135deg, #fff59d, #ffca28); }
+    /* Atingido em rosa vibrante */
+    .summary-atingido { background: linear-gradient(135deg, #f48fb1, #f06292); }
+    /* % (atingimento) em azul vibrante */
+    .summary-percent { background: linear-gradient(135deg, #b2ebf2, #4dd0e1); }
+    /* Meta próxima em verde vibrante */
+    .summary-meta-proxima { background: linear-gradient(135deg, #c8e6c9, #66bb6a); }
+    /* Proj. valor em lilás vibrante */
+    .summary-proj-valor { background: linear-gradient(135deg, #d1c4e9, #9575cd); }
+    /* Proj. % em laranja vibrante */
+    .summary-proj-percent { background: linear-gradient(135deg, #ffe0b2, #ffb74d); }
+    /* Status em cinza claro */
+    .summary-status { background: linear-gradient(135deg, #f5f5f5, #e0e0e0); }
+
+    /* Layout para os cartões principais (visão geral e resumo diário) */
+    .header-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    .overview-card {
+      flex: 1 1 600px;
+      background: linear-gradient(135deg, #e3f2fd, #f1f8e9);
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .overview-inputs {
+      margin-bottom: 10px;
+    }
+    .overview-gauge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      /* Fix width to align beside inputs */
+      flex: 0 0 250px;
+      max-width: 250px;
+    }
+    .gauge-label {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #333;
+      font-weight: bold;
+    }
+    .overview-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+    }
+
+    /* New wrapper for inputs and gauge side by side */
+    .overview-top {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .overview-top .overview-inputs {
+      flex: 1 1 300px;
+      min-width: 250px;
+    }
+    .overview-top .overview-gauge {
+      flex: 0 0 250px;
+      max-width: 250px;
+    }
+    .overview-metric-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 8px;
+      color: #333;
+      font-size: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+    .overview-metric-item .metric-icon {
+      margin-right: 6px;
+      font-size: 16px;
+      color: #333;
+    }
+    .overview-metric-item .metric-label {
+      flex: 1;
+      font-weight: bold;
+      color: #333;
+    }
+    .overview-metric-item .metric-value {
+      font-weight: bold;
+      color: #333;
+    }
+    /* Cores de gradiente específicas para cada métrica */
+    .ov-meta-diaria { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+    .ov-meta-atingida { background: linear-gradient(135deg, #00c853, #00bfa5); }
+    .ov-meta-progresso { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+    .ov-meta-restante { background: linear-gradient(135deg, #fbd786, #f7797d); }
+
+    /* Cartão de resumo diário com layout em duas colunas */
+    .daily-summary-card {
+      flex: 1 1 400px;
+      background: linear-gradient(135deg, #7b57f5, #6275ee);
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      padding: 20px;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+    .daily-summary-card .summary-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .daily-summary-content {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .daily-gauge {
+      flex: 0 0 45%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .daily-metrics {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    /* Ajusta as cores das métricas do resumo diário para ficarem legíveis sobre o cartão roxo */
+    .daily-metrics .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 11px;
+      color: #333;
+    }
+    .daily-metrics .summary-item .summary-label {
+      font-weight: bold;
+      color: #333;
+    }
+    .daily-metrics .summary-item .summary-value {
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* Estilos para a linha de métricas principais */
+    .metrics-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .metric-card {
+      flex: 1 1 220px;
+      min-width: 200px;
+      border-radius: 12px;
+      padding: 15px 20px;
+      color: #333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .metric-card .metric-icon {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .metric-card .metric-title {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .metric-card .metric-value {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    /* Cores de gradiente para cada cartão de métricas */
+    .metric-daily {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+    }
+    .metric-achieved {
+      background: linear-gradient(135deg, #00c853, #00bfa5);
+    }
+    .metric-progress {
+      background: linear-gradient(135deg, #ff9a9e, #fecfef);
+    }
+    .metric-remaining {
+      background: linear-gradient(135deg, #fbd786, #f7797d);
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        margin: 20px;
+        padding: 15px;
+      }
+      h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>MAPA DE VENDAS</h1>
+    <!-- Cartões principais: visão geral e resumo diário -->
+    <div class="header-cards">
+      <!-- Cartão de visão geral com metas e progresso -->
+      <div class="overview-card" id="overviewCard">
+        <!-- Top section: inputs and gauge side by side -->
+        <div class="overview-top">
+          <div class="overview-inputs">
+            <div class="form-group">
+              <label for="totalGoal">Valor total da meta do mês:</label>
+              <input type="number" id="totalGoal" placeholder="Digite o valor total da meta" min="0" step="0.01">
+            </div>
+            <div class="form-group">
+              <label for="workDays">Quantidade de dias úteis (1–31):</label>
+              <input type="number" id="workDays" placeholder="Informe o número de dias úteis" min="1" max="31" step="1">
+            </div>
+          </div>
+          <div class="overview-gauge">
+            <canvas id="pieChart" width="220" height="220"></canvas>
+            <div class="gauge-label">Progresso da Meta</div>
+          </div>
+        </div>
+        <!-- Metrics row below inputs and gauge -->
+        <div class="overview-metrics">
+          <div class="overview-metric-item ov-meta-diaria">
+            <span class="metric-icon">📅</span>
+            <span class="metric-label">Meta Diária</span>
+            <span class="metric-value" id="ovMetricDailyValue">R$ 0,00</span>
+          </div>
+          <div class="overview-metric-item ov-meta-atingida">
+            <span class="metric-icon">✅</span>
+            <span class="metric-label">Meta Atingida</span>
+            <span class="metric-value" id="ovMetricAchievedValue">R$ 0,00</span>
+          </div>
+          <div class="overview-metric-item ov-meta-progresso">
+            <span class="metric-icon">📈</span>
+            <span class="metric-label">Progresso</span>
+            <span class="metric-value" id="ovMetricProgressValue">0.00%</span>
+          </div>
+          <div class="overview-metric-item ov-meta-restante">
+            <span class="metric-icon">🎯</span>
+            <span class="metric-label">Falta Quanto</span>
+            <span class="metric-value" id="ovMetricRemainingValue">R$ 0,00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cartão de resumo diário -->
+      <div class="daily-summary-card" id="dailySummary" style="display:none;">
+        <h2 class="summary-title">RESUMO DIÁRIO D -1</h2>
+        <input type="date" id="summaryDate" class="summary-date-input" />
+        <div class="daily-summary-content">
+          <div class="daily-gauge">
+            <canvas id="summaryPieChart" width="180" height="180"></canvas>
+          </div>
+          <div class="daily-metrics">
+            <div class="summary-item summary-meta-diaria">
+              <span class="summary-label">Meta diária (constante)</span>
+              <span class="summary-value" id="summaryMetaDiaria">-</span>
+            </div>
+            <div class="summary-item summary-meta-ajustada">
+              <span class="summary-label">Meta ajustada</span>
+              <span class="summary-value" id="summaryMetaAjustada">-</span>
+            </div>
+            <div class="summary-item summary-atingido">
+              <span class="summary-label">Atingido</span>
+              <span class="summary-value" id="summaryAtingido">-</span>
+            </div>
+            <div class="summary-item summary-percent">
+              <span class="summary-label">% (atingimento)</span>
+              <span class="summary-value" id="summaryPercent">-</span>
+            </div>
+            <div class="summary-item summary-meta-proxima">
+              <span class="summary-label">Meta próxima</span>
+              <span class="summary-value" id="summaryMetaProxima">-</span>
+            </div>
+            <div class="summary-item summary-proj-valor">
+              <span class="summary-label">Proj. valor</span>
+              <span class="summary-value" id="summaryProjValor">-</span>
+            </div>
+            <div class="summary-item summary-proj-percent">
+              <span class="summary-label">Proj. %</span>
+              <span class="summary-value" id="summaryProjPercent">-</span>
+            </div>
+            <div class="summary-item summary-status">
+              <span class="summary-label">Status</span>
+              <span class="summary-value" id="summaryStatus">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Aviso de erros ou conclusões -->
+    <div id="warning" class="warning"></div>
+    <!-- Tabela dinâmica de metas diárias -->
+    <table id="goalsTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>
+            <div class="header-title">Dia</div>
+            <div class="header-desc">N.º do dia útil</div>
+          </th>
+          <th>
+            <div class="header-title">Data</div>
+            <div class="header-desc">Selecione a data</div>
+          </th>
+          <th>
+            <div class="header-title">Meta diária (constante)</div>
+            <div class="header-desc">Meta dividida igualmente pelo total de dias</div>
+          </th>
+          <th>
+            <div class="header-title">Meta ajustada</div>
+            <div class="header-desc">Meta para hoje recalculada com base no saldo</div>
+          </th>
+          <th>
+            <div class="header-title">Atingido</div>
+            <div class="header-desc">Valor realizado</div>
+          </th>
+          <th>
+            <div class="header-title">% (atingimento)</div>
+            <div class="header-desc">Percentual do valor realizado sobre a meta</div>
+          </th>
+          <th>
+            <div class="header-title">Meta próxima</div>
+            <div class="header-desc">Meta prevista para o dia seguinte</div>
+          </th>
+          <th>
+            <div class="header-title">Proj. valor</div>
+            <div class="header-desc">Valor projetado ao final do período</div>
+          </th>
+          <th>
+            <div class="header-title">Proj. %</div>
+            <div class="header-desc">Percentual projetado ao final do período</div>
+          </th>
+          <th>
+            <div class="header-title">Status</div>
+            <div class="header-desc">Meta batida?</div>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="goalsTableBody">
+        <!-- Linhas serão geradas dinamicamente -->
+      </tbody>
+    </table>
+
+    <!-- Contêiner de gráficos de desempenho -->
+    <div class="charts-row" id="chartsRow" style="display:none;">
+      <div class="chart-box">
+        <h3 style="text-align:center; font-size:14px; margin-bottom:4px;">Meta vs. Atingido</h3>
+        <canvas id="progressChart" width="800" height="220"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3 style="text-align:center; font-size:14px; margin-bottom:4px;">Performance Diária (%)</h3>
+        <canvas id="performanceChart" width="800" height="220"></canvas>
+      </div>
+    </div>
+
+    <!-- Glossário explicativo das colunas -->
+    <div id="glossary" style="display:none;">
+      <h3 style="margin-top:20px;">Glossário de Colunas</h3>
+      <ul style="list-style-type: disc; padding-left: 20px; font-size: 14px; color: #333;">
+        <li><strong>Dia</strong>: Número sequencial do dia útil.</li>
+        <li><strong>Data</strong>: Data correspondente ao dia útil.</li>
+        <li><strong>Meta diária (constante)</strong>: Meta fixa dividida igualmente pelo total de dias úteis.</li>
+        <li><strong>Meta ajustada</strong>: Meta do dia recalculada considerando o saldo remanescente.</li>
+        <li><strong>Atingido</strong>: Valor efetivamente realizado no dia.</li>
+        <li><strong>% (atingimento)</strong>: Porcentagem do valor realizado em relação à meta ajustada do dia.</li>
+        <li><strong>Meta próxima</strong>: Meta prevista para o próximo dia útil, calculada após o lançamento do dia atual.</li>
+        <li><strong>Proj. valor</strong>: Estimativa do valor total ao final do período, mantendo o ritmo médio atual.</li>
+        <li><strong>Proj. %</strong>: Estimativa do percentual da meta total ao final do período, mantendo o ritmo médio atual.</li>
+        <li><strong>Status</strong>: Indicador visual (seta) mostrando se a meta do dia foi cumprida (▲) ou não (▼).</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * Utilitário para formatar valores monetários em real (BRL).
+     * @param {number} value - Valor numérico a ser formatado
+     * @returns {string} - Valor formatado no padrão pt-BR
+     */
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        minimumFractionDigits: 2
+      }).format(value);
+    }
+
+    // Seleção dos elementos do formulário
+    const totalGoalInput = document.getElementById('totalGoal');
+    const workDaysInput = document.getElementById('workDays');
+    const warningDiv = document.getElementById('warning');
+    const goalsTable = document.getElementById('goalsTable');
+    const goalsBody = document.getElementById('goalsTableBody');
+
+    // Glossário explicativo
+    const glossaryDiv = document.getElementById('glossary');
+
+    // Referência ao canvas do gráfico
+    const progressChart = document.getElementById('progressChart');
+    const chartCtx = progressChart.getContext('2d');
+
+    // Referência ao canvas do gráfico de pizza
+    const pieChart = document.getElementById('pieChart');
+    const pieCtx = pieChart.getContext('2d');
+
+    // Referência ao canvas do gráfico de performance diária
+    const performanceChart = document.getElementById('performanceChart');
+    const perfCtx = performanceChart.getContext('2d');
+    // Contêiner que agrupa os gráficos
+    const chartsRow = document.getElementById('chartsRow');
+
+    // Elementos do resumo diário
+    const dailySummaryDiv = document.getElementById('dailySummary');
+    const summaryDateInput = document.getElementById('summaryDate');
+    const summaryPieChart = document.getElementById('summaryPieChart');
+    const summaryPieCtx = summaryPieChart.getContext('2d');
+    const summaryMetaDiaria = document.getElementById('summaryMetaDiaria');
+    const summaryMetaAjustada = document.getElementById('summaryMetaAjustada');
+    const summaryAtingido = document.getElementById('summaryAtingido');
+    const summaryPercent = document.getElementById('summaryPercent');
+    const summaryMetaProxima = document.getElementById('summaryMetaProxima');
+    const summaryProjValor = document.getElementById('summaryProjValor');
+    const summaryProjPercent = document.getElementById('summaryProjPercent');
+    const summaryStatus = document.getElementById('summaryStatus');
+
+    // Elemento do cartão de visão geral
+    const overviewCardEl = document.getElementById('overviewCard');
+
+    // Elementos das métricas principais (visão geral)
+    const ovMetricDailyValue = document.getElementById('ovMetricDailyValue');
+    const ovMetricAchievedValue = document.getElementById('ovMetricAchievedValue');
+    const ovMetricProgressValue = document.getElementById('ovMetricProgressValue');
+    const ovMetricRemainingValue = document.getElementById('ovMetricRemainingValue');
+
+
+    // Estado da aplicação
+    let totalGoal = 0;
+    let totalDays = 0;
+    let achievedArray = []; // Valor atingido por dia
+    let dailyTargets = [];  // Meta por dia (calculada)
+    let dateArray = [];     // Datas selecionadas por dia
+
+    /**
+     * Inicializa a planilha de metas diárias com base no número de dias úteis.
+     * Cria as linhas e associa eventos de input para cada dia.
+     */
+    function initTable() {
+      // Limpa qualquer conteúdo anterior
+      goalsBody.innerHTML = '';
+      achievedArray = new Array(totalDays).fill(0);
+      dailyTargets = new Array(totalDays).fill(0);
+      dateArray = new Array(totalDays).fill('');
+      for (let i = 0; i < totalDays; i++) {
+        const row = document.createElement('tr');
+        // Coluna Dia
+        const dayCell = document.createElement('td');
+        dayCell.textContent = i + 1;
+        row.appendChild(dayCell);
+        // Coluna Data (campo input type="date")
+        const dateCell = document.createElement('td');
+        const dateInput = document.createElement('input');
+        dateInput.type = 'date';
+        dateInput.className = 'date-input';
+        dateInput.dataset.index = i.toString();
+        dateInput.addEventListener('input', (event) => {
+          const idx = parseInt(event.target.dataset.index, 10);
+          dateArray[idx] = event.target.value;
+        });
+        dateCell.appendChild(dateInput);
+        row.appendChild(dateCell);
+        // Coluna Meta diária (constante)
+        const metaDailyCell = document.createElement('td');
+        metaDailyCell.id = `metaDaily-${i}`;
+        row.appendChild(metaDailyCell);
+        // Coluna Meta comercial do dia anterior
+        const previousGoalCell = document.createElement('td');
+        previousGoalCell.id = `previousGoal-${i}`;
+        row.appendChild(previousGoalCell);
+        // Coluna Meta atingida (campo input)
+        const achievedCell = document.createElement('td');
+        const achievedInput = document.createElement('input');
+        achievedInput.type = 'number';
+        achievedInput.min = '0';
+        achievedInput.step = '0.01';
+        achievedInput.className = 'meta-atingida';
+        achievedInput.placeholder = 'Atingido';
+        achievedInput.dataset.index = i.toString();
+        achievedInput.addEventListener('input', onAchievedChange);
+        achievedCell.appendChild(achievedInput);
+        row.appendChild(achievedCell);
+        // Coluna % Atingimento
+        const pctCell = document.createElement('td');
+        pctCell.id = `pct-${i}`;
+        row.appendChild(pctCell);
+        // Coluna Meta comercial do dia
+        const nextGoalCell = document.createElement('td');
+        nextGoalCell.id = `nextGoal-${i}`;
+        row.appendChild(nextGoalCell);
+        // Coluna Projeção em valor (R$)
+        const projValCell = document.createElement('td');
+        projValCell.id = `projVal-${i}`;
+        row.appendChild(projValCell);
+        // Coluna Projeção em %
+        const projPctCell = document.createElement('td');
+        projPctCell.id = `projPct-${i}`;
+        row.appendChild(projPctCell);
+        // Coluna Status (seta para cima ou para baixo)
+        const statusCell = document.createElement('td');
+        statusCell.id = `status-${i}`;
+        row.appendChild(statusCell);
+        goalsBody.appendChild(row);
+      }
+      // Após criar linhas, calcula metas iniciais com zero realizado
+      recalculateDailyTargets();
+      updateTableDisplay();
+    }
+
+    /**
+     * Evento chamado quando o valor atingido em um dia é alterado.
+     * Atualiza o array de valores atingidos e recalcula as metas subsequentes.
+     * @param {InputEvent} event - Evento de input
+     */
+    function onAchievedChange(event) {
+      const index = parseInt(event.target.dataset.index, 10);
+      const value = parseFloat(event.target.value);
+      achievedArray[index] = isNaN(value) ? 0 : value;
+      recalculateDailyTargets();
+      updateTableDisplay();
+    }
+
+    /**
+     * Recalcula as metas diárias considerando o progresso até cada dia.
+     * Para cada dia, calcula a meta restante dividida pelo número de dias restantes.
+     */
+    function recalculateDailyTargets() {
+      // Soma dos valores atingidos até o dia anterior
+      let cumulativeAchieved = 0;
+      for (let i = 0; i < totalDays; i++) {
+        // Cálculo da meta diária para o dia i (0-index)
+        const remaining = Math.max(totalGoal - cumulativeAchieved, 0);
+        const remainingDays = totalDays - i;
+        dailyTargets[i] = remainingDays > 0 ? remaining / remainingDays : 0;
+        // Adiciona o valor atingido deste dia para acumular no próximo
+        cumulativeAchieved += achievedArray[i] || 0;
+      }
+    }
+
+    /**
+     * Atualiza a visualização da tabela com base nos valores calculados.
+     * Mostra metas, percentuais e metas do próximo dia.
+     */
+    function updateTableDisplay() {
+      // Atualiza todas as linhas
+      // Meta diária constante para todo o período
+      const constantDaily = totalDays > 0 ? (totalGoal / totalDays) : 0;
+      // Variável para acumular metas atingidas e calcular projeção
+      let cumulativeProjection = 0;
+      for (let i = 0; i < totalDays; i++) {
+        const previousGoalCell = document.getElementById(`previousGoal-${i}`);
+        const metaDailyCell = document.getElementById(`metaDaily-${i}`);
+        const pctCell = document.getElementById(`pct-${i}`);
+        const nextGoalCell = document.getElementById(`nextGoal-${i}`);
+        const statusCell = document.getElementById(`status-${i}`);
+        const projValCell = document.getElementById(`projVal-${i}`);
+        const projPctCell = document.getElementById(`projPct-${i}`);
+        // Meta do dia (anterior) é a meta calculada para este dia
+        const targetToday = dailyTargets[i];
+        // Meta diária constante
+        metaDailyCell.textContent = formatCurrency(constantDaily);
+        previousGoalCell.textContent = formatCurrency(targetToday);
+        // % Atingimento
+        const achieved = achievedArray[i] || 0;
+        if (targetToday > 0) {
+          const percent = (achieved / targetToday) * 100;
+          pctCell.textContent = percent.toFixed(2) + '%';
+        } else {
+          pctCell.textContent = '-';
+        }
+        // Meta do próximo dia, se houver
+        if (i + 1 < totalDays) {
+          nextGoalCell.textContent = formatCurrency(dailyTargets[i + 1]);
+        } else {
+          nextGoalCell.textContent = '-';
+        }
+
+        // Atualiza status (seta verde para meta atingida, vermelha para não atingida)
+        if (targetToday > 0) {
+          if (achieved >= targetToday) {
+            statusCell.textContent = '▲';
+            statusCell.style.color = '#4caf50';
+            statusCell.style.fontSize = '18px';
+          } else {
+            statusCell.textContent = '▼';
+            statusCell.style.color = '#f44336';
+            statusCell.style.fontSize = '18px';
+          }
+        } else {
+          statusCell.textContent = '';
+        }
+
+        // Atualiza projeção de valor e porcentagem baseados na média de atingimento até o momento
+        cumulativeProjection += achieved;
+        const avgAchieved = (i + 1) > 0 ? cumulativeProjection / (i + 1) : 0;
+        const projectedValue = avgAchieved * totalDays;
+        const projectedPercent = totalGoal > 0 ? (projectedValue / totalGoal) * 100 : 0;
+        if (projValCell) {
+          projValCell.textContent = formatCurrency(projectedValue);
+        }
+        if (projPctCell) {
+          projPctCell.textContent = projectedPercent.toFixed(2) + '%';
+        }
+      }
+      // Calcula valor total já atingido
+      const overallAchievedValue = achievedArray.reduce((sum, val) => sum + (val || 0), 0);
+      // Atualiza métricas principais na visão geral
+      if (ovMetricDailyValue && ovMetricAchievedValue && ovMetricProgressValue && ovMetricRemainingValue) {
+        ovMetricDailyValue.textContent = formatCurrency(constantDaily);
+        ovMetricAchievedValue.textContent = formatCurrency(overallAchievedValue);
+        const progressPct = (totalGoal > 0) ? (overallAchievedValue / totalGoal) * 100 : 0;
+        ovMetricProgressValue.textContent = progressPct.toFixed(2) + '%';
+        const remainingVal = Math.max(totalGoal - overallAchievedValue, 0);
+        ovMetricRemainingValue.textContent = formatCurrency(remainingVal);
+      }
+
+      // Atualiza gráficos após atualizar a tabela
+      renderProgressChart();
+      renderPieChart();
+      renderPerformanceChart();
+    }
+
+    /**
+     * Função que lê os valores principais e inicia ou atualiza a tabela de metas.
+     */
+    function updateInitialSettings() {
+      warningDiv.style.display = 'none';
+      warningDiv.textContent = '';
+      totalGoal = parseFloat(totalGoalInput.value);
+      totalDays = parseInt(workDaysInput.value, 10);
+      // Validação das entradas principais
+      if (isNaN(totalGoal) || totalGoal <= 0) {
+        goalsTable.style.display = 'none';
+        chartsRow.style.display = 'none';
+        glossaryDiv.style.display = 'none';
+        dailySummaryDiv.style.display = 'none';
+        return;
+      }
+      if (isNaN(totalDays) || totalDays <= 0) {
+        warningDiv.textContent = 'O número de dias úteis deve ser maior que zero.';
+        warningDiv.style.display = 'block';
+        goalsTable.style.display = 'none';
+        chartsRow.style.display = 'none';
+        glossaryDiv.style.display = 'none';
+        dailySummaryDiv.style.display = 'none';
+        return;
+      }
+      if (totalDays > 31) {
+        warningDiv.textContent = 'O número máximo de dias úteis suportado é 31.';
+        warningDiv.style.display = 'block';
+        goalsTable.style.display = 'none';
+        chartsRow.style.display = 'none';
+        glossaryDiv.style.display = 'none';
+        dailySummaryDiv.style.display = 'none';
+        return;
+      }
+      // Inicializa e exibe a tabela
+      initTable();
+      goalsTable.style.display = 'table';
+      chartsRow.style.display = 'flex';
+      pieChart.style.display = 'block';
+      glossaryDiv.style.display = 'block';
+      dailySummaryDiv.style.display = 'flex';
+      // Limpa seleção de data e resumo
+      if (summaryDateInput) summaryDateInput.value = '';
+      clearSummary();
+    }
+
+    /**
+     * Desenha um gráfico de barras no canvas mostrando a meta e o valor atingido
+     * para cada dia. Cada barra possui um fundo cinza representando a meta
+     * estimada e uma barra colorida por cima representando o valor atingido.
+     */
+    function renderProgressChart() {
+      // Se o número de dias ou metas não foi definido, limpe o gráfico e retorne
+      if (!totalDays || totalDays <= 0) {
+        chartCtx.clearRect(0, 0, progressChart.width, progressChart.height);
+        return;
+      }
+      const canvasWidth = progressChart.width;
+      const canvasHeight = progressChart.height;
+      // Limpa o canvas
+      chartCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+      // Determina o valor máximo entre metas e valores atingidos para normalizar a altura das barras
+      let maxVal = 0;
+      for (let i = 0; i < totalDays; i++) {
+        maxVal = Math.max(maxVal, dailyTargets[i], achievedArray[i] || 0);
+      }
+      // Evita divisão por zero
+      if (maxVal <= 0) {
+        return;
+      }
+      const barWidth = canvasWidth / totalDays;
+      for (let i = 0; i < totalDays; i++) {
+        const target = dailyTargets[i];
+        const achieved = achievedArray[i] || 0;
+        const x = i * barWidth;
+        // Alturas normalizadas
+        const targetHeight = (target / maxVal) * (canvasHeight - 20); // 20px de margem superior
+        const achievedHeight = (achieved / maxVal) * (canvasHeight - 20);
+        const yTarget = canvasHeight - targetHeight;
+        const yAchieved = canvasHeight - achievedHeight;
+        // Desenha a meta (fundo cinza)
+        chartCtx.fillStyle = '#eeeeee';
+        chartCtx.fillRect(x + 4, yTarget, barWidth - 8, targetHeight);
+        // Desenha o valor atingido com cor condicional
+        chartCtx.fillStyle = achieved >= target ? '#4caf50' : '#ff9800';
+        chartCtx.fillRect(x + 4, yAchieved, barWidth - 8, achievedHeight);
+        // Desenha uma linha de base
+        chartCtx.strokeStyle = '#cccccc';
+        chartCtx.lineWidth = 1;
+        chartCtx.beginPath();
+        chartCtx.moveTo(x, canvasHeight);
+        chartCtx.lineTo(x + barWidth, canvasHeight);
+        chartCtx.stroke();
+      }
+    }
+
+    /**
+     * Desenha um gráfico de pizza que representa a proporção entre
+     * a meta total e a soma dos valores já atingidos.
+     */
+    function renderPieChart() {
+      // Se totalGoal não for definido ou não houver tabela, limpe e oculte
+      if (!totalGoal || totalGoal <= 0 || !totalDays || totalDays <= 0) {
+        pieCtx.clearRect(0, 0, pieChart.width, pieChart.height);
+        return;
+      }
+      // Soma total atingido
+      let achievedSum = 0;
+      for (let i = 0; i < achievedArray.length; i++) {
+        achievedSum += achievedArray[i] || 0;
+      }
+      // Ajusta valor acumulado para não exceder a meta
+      achievedSum = Math.min(achievedSum, totalGoal);
+      const width = pieChart.width;
+      const height = pieChart.height;
+      const ctx = pieCtx;
+      ctx.clearRect(0, 0, width, height);
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) / 2 - 15;
+      const percent = totalGoal > 0 ? (achievedSum / totalGoal) : 0;
+      // Desenha anel de fundo
+      ctx.lineWidth = 18;
+      ctx.strokeStyle = '#e0e0e0';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.stroke();
+      // Desenha anel de progresso
+      ctx.strokeStyle = '#7b57f5';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + percent * 2 * Math.PI);
+      ctx.stroke();
+      // Texto no centro com percentual
+      ctx.fillStyle = '#333';
+      ctx.font = '18px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const percentText = (percent * 100).toFixed(1) + '%';
+      ctx.fillText(percentText, centerX, centerY);
+    }
+
+    /**
+     * Desenha um gráfico de barras representando a performance diária em
+     * porcentagem. Cada barra mostra a razão entre o valor atingido e a
+     * meta ajustada para aquele dia (meta do dia anterior). Barras verdes
+     * indicam que a meta foi alcançada ou superada (≥100%), enquanto barras
+     * laranja indicam que a performance ficou abaixo da meta (<100%).
+     */
+    function renderPerformanceChart() {
+      // Se os dados principais não estiverem definidos, limpe o canvas
+      if (!totalDays || totalDays <= 0) {
+        perfCtx.clearRect(0, 0, performanceChart.width, performanceChart.height);
+        return;
+      }
+      const canvasWidth = performanceChart.width;
+      const canvasHeight = performanceChart.height;
+      // Limpa o canvas
+      perfCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+      // Determina o valor máximo da razão (atingido/meta) para normalizar
+      let maxRatio = 1;
+      for (let i = 0; i < totalDays; i++) {
+        const target = dailyTargets[i];
+        const achieved = achievedArray[i] || 0;
+        if (target > 0) {
+          const ratio = achieved / target;
+          if (ratio > maxRatio) maxRatio = ratio;
+        }
+      }
+      // Evita divisão por zero
+      if (maxRatio <= 0) {
+        return;
+      }
+      const barWidth = canvasWidth / totalDays;
+      // Desenha linha de referência em 100% (1) se ela couber no gráfico
+      const referenceY = canvasHeight - (1 / maxRatio) * (canvasHeight - 20);
+      perfCtx.strokeStyle = '#90a4ae';
+      perfCtx.lineWidth = 1;
+      perfCtx.beginPath();
+      perfCtx.moveTo(0, referenceY);
+      perfCtx.lineTo(canvasWidth, referenceY);
+      perfCtx.stroke();
+      // Escreve indicação de 100%
+      perfCtx.fillStyle = '#607d8b';
+      perfCtx.font = '10px Arial';
+      perfCtx.textAlign = 'right';
+      perfCtx.fillText('100%', canvasWidth - 2, referenceY - 2);
+      // Desenha barras
+      for (let i = 0; i < totalDays; i++) {
+        const target = dailyTargets[i];
+        const achieved = achievedArray[i] || 0;
+        const ratio = target > 0 ? achieved / target : 0;
+        const barHeight = (ratio / maxRatio) * (canvasHeight - 20);
+        const x = i * barWidth;
+        const y = canvasHeight - barHeight;
+        // Barra de fundo clara para toda a área
+        perfCtx.fillStyle = '#eeeeee';
+        perfCtx.fillRect(x + 4, 0, barWidth - 8, canvasHeight);
+        // Barra de performance
+        perfCtx.fillStyle = ratio >= 1 ? '#4caf50' : '#ff9800';
+        perfCtx.fillRect(x + 4, y, barWidth - 8, barHeight);
+      }
+    }
+
+    // Eventos para atualizar tabela ao alterar configurações
+    totalGoalInput.addEventListener('input', updateInitialSettings);
+    workDaysInput.addEventListener('input', updateInitialSettings);
+
+    // Executa atualização inicial ao carregar a página para exibir inputs e métricas zeradas
+    document.addEventListener('DOMContentLoaded', () => {
+      updateInitialSettings();
+    });
+
+    // Evento para atualizar o resumo diário quando a data for selecionada
+    if (summaryDateInput) {
+      summaryDateInput.addEventListener('input', updateDailySummary);
+    }
+
+    /**
+     * Atualiza o resumo do dia selecionado no gadget de resumo diário.
+     * Procura a data no vetor de datas e, se encontrar, preenche os valores
+     * correspondentes no resumo. Caso não encontre ou não haja seleção,
+     * limpa o resumo.
+     */
+    function updateDailySummary() {
+      // Se totalGoal ou totalDays forem inválidos, não atualiza
+      if (!totalGoal || totalGoal <= 0 || !totalDays || totalDays <= 0) {
+        clearSummary();
+        return;
+      }
+      const selectedDate = summaryDateInput.value;
+      if (!selectedDate) {
+        clearSummary();
+        return;
+      }
+      // Procura o índice da data selecionada
+      const idx = dateArray.findIndex((d) => d === selectedDate);
+      if (idx === -1) {
+        clearSummary();
+        return;
+      }
+      // Meta diária constante
+      const constantDaily = totalGoal / totalDays;
+      // Meta ajustada para o dia
+      const targetToday = dailyTargets[idx] || 0;
+      // Meta do próximo dia
+      const nextTarget = (idx + 1 < totalDays) ? dailyTargets[idx + 1] : 0;
+      // Valor atingido
+      const achieved = achievedArray[idx] || 0;
+      // Percentual de atingimento
+      const percent = targetToday > 0 ? (achieved / targetToday) * 100 : 0;
+      // Projeção: média de atingido até o dia
+      let cumulative = 0;
+      for (let i = 0; i <= idx; i++) {
+        cumulative += achievedArray[i] || 0;
+      }
+      const avgAchieved = (idx + 1) > 0 ? cumulative / (idx + 1) : 0;
+      const projVal = avgAchieved * totalDays;
+      const projPct = totalGoal > 0 ? (projVal / totalGoal) * 100 : 0;
+      // Status
+      const statusArrow = targetToday > 0 ? (achieved >= targetToday ? '▲' : '▼') : '';
+      // Preenche os campos
+      summaryMetaDiaria.textContent = formatCurrency(constantDaily);
+      summaryMetaAjustada.textContent = formatCurrency(targetToday);
+      summaryAtingido.textContent = formatCurrency(achieved);
+      summaryPercent.textContent = percent.toFixed(2) + '%';
+      summaryMetaProxima.textContent = (idx + 1 < totalDays) ? formatCurrency(nextTarget) : '-';
+      summaryProjValor.textContent = formatCurrency(projVal);
+      summaryProjPercent.textContent = projPct.toFixed(2) + '%';
+      summaryStatus.textContent = statusArrow;
+      if (statusArrow) {
+        summaryStatus.style.color = (achieved >= targetToday ? '#4caf50' : '#f44336');
+        summaryStatus.style.fontSize = '18px';
+      }
+      // Atualiza o gráfico de pizza do resumo
+      renderSummaryPieChart(achieved, targetToday);
+    }
+
+    /**
+     * Limpa todos os campos do resumo diário e o gráfico de pizza.
+     */
+    function clearSummary() {
+      summaryMetaDiaria.textContent = '-';
+      summaryMetaAjustada.textContent = '-';
+      summaryAtingido.textContent = '-';
+      summaryPercent.textContent = '-';
+      summaryMetaProxima.textContent = '-';
+      summaryProjValor.textContent = '-';
+      summaryProjPercent.textContent = '-';
+      summaryStatus.textContent = '-';
+      summaryStatus.style.color = '#333';
+      summaryPieCtx.clearRect(0, 0, summaryPieChart.width, summaryPieChart.height);
+    }
+
+    /**
+     * Desenha um gráfico de pizza no gadget de resumo diário, representando
+     * a proporção entre o valor atingido no dia e a meta ajustada do dia.
+     * @param {number} achieved - Valor atingido no dia selecionado
+     * @param {number} target - Meta ajustada para o dia selecionado
+     */
+    function renderSummaryPieChart(achieved, target) {
+      // Se não houver meta, limpa o canvas
+      if (!target || target <= 0) {
+        summaryPieCtx.clearRect(0, 0, summaryPieChart.width, summaryPieChart.height);
+        return;
+      }
+      const width = summaryPieChart.width;
+      const height = summaryPieChart.height;
+      summaryPieCtx.clearRect(0, 0, width, height);
+      // Não deixa a parte alcançada exceder a meta ajustada
+      const achievedSlice = Math.min(achieved, target);
+      const remainingSlice = Math.max(target - achievedSlice, 0);
+      const data = [achievedSlice, remainingSlice];
+      const colors = ['#4caf50', '#cfd8dc'];
+      const radius = Math.min(width, height) / 2 - 10;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      let startAngle = -Math.PI / 2;
+      const total = target;
+      for (let i = 0; i < data.length; i++) {
+        const sliceAngle = (data[i] / total) * 2 * Math.PI;
+        summaryPieCtx.beginPath();
+        summaryPieCtx.moveTo(centerX, centerY);
+        summaryPieCtx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+        summaryPieCtx.closePath();
+        summaryPieCtx.fillStyle = colors[i];
+        summaryPieCtx.fill();
+        startAngle += sliceAngle;
+      }
+      // Texto no centro: percentual de atingimento
+      const percent = (achieved / target) * 100;
+      summaryPieCtx.fillStyle = '#333';
+      summaryPieCtx.font = '14px Arial';
+      summaryPieCtx.textAlign = 'center';
+      summaryPieCtx.textBaseline = 'middle';
+      summaryPieCtx.fillText(percent.toFixed(1) + '%', centerX, centerY);
+    }
+  </script>
+</body>
+</html>
